@@ -115,3 +115,44 @@ export function copysign (x, y) {
   const signy = y > 0 ? true : y < 0 ? false : 1 / y === Infinity
   return signx ^ signy ? -x : x
 }
+/**
+ * Округлює число на основі кількості значущих цифр.
+ * @param {Object} split - Розділене число (об'єкт з sign, coefficients, exponent).
+ * @param {number} precision - Кількість значущих цифр.
+ * @returns {Object} - Округлене число у вигляді об'єкта.
+ */
+export function roundDigits(split, precision) {
+  if (typeof precision !== 'number' || precision <= 0) {
+    return split; // якщо precision некоректний, повертаємо без змін
+  }
+
+  const { coefficients, exponent, sign } = split;
+
+  // Якщо кількість цифр вже менша або дорівнює precision, повертаємо як є
+  if (coefficients.length <= precision) {
+    return split;
+  }
+
+  // Округлення коефіцієнтів
+  const factor = Math.pow(10, coefficients.length - precision);
+  const rounded = Math.round(
+    parseInt(coefficients.join('')) / factor
+  );
+
+  // Розбиваємо округлене число назад у цифри
+  const newCoefficients = String(rounded).split('').map(Number);
+
+  return {
+    sign,
+    coefficients: newCoefficients,
+    exponent: exponent + (coefficients.length - newCoefficients.length),
+  };
+}
+/**
+ * Перевіряє, чи є значення числом.
+ * @param {any} value
+ * @returns {boolean}
+ */
+const isNumber = value => typeof value === 'number' && isFinite(value);
+
+
